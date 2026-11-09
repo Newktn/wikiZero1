@@ -1,0 +1,5 @@
+= Product C
+
+== Vue d'ensemble
+
+Documentation officielle du **Product C**.

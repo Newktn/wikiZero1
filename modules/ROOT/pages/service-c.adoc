@@ -1,0 +1,5 @@
+= Service C
+
+== Vue d'ensemble
+
+Documentation technique du **Service C**.

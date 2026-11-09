@@ -1,3 +1,5 @@
-﻿= Service B
+= Service B
 
-Documentation du Service B.
+== Vue d'ensemble
+
+Documentation technique du **Service B**.

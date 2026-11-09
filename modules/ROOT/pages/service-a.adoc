@@ -1,0 +1,5 @@
+= Service A
+
+== Vue d'ensemble
+
+Documentation technique du **Service A**.

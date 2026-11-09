@@ -1,4 +1,13 @@
-﻿= WikiZero1
+= WikiZero1
+
+== Products
 
 * xref:product-a.adoc[Product A]
+* xref:product-b.adoc[Product B]
+* xref:product-c.adoc[Product C]
+
+== Services
+
+* xref:service-a.adoc[Service A]
 * xref:service-b.adoc[Service B]
+* xref:service-c.adoc[Service C]

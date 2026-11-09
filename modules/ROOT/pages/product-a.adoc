@@ -1,3 +1,5 @@
-﻿= Product A
+= Product A
 
-Documentation du Product A.
+== Vue d'ensemble
+
+Documentation officielle du **Product A**.

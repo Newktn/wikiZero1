@@ -1,4 +1,4 @@
-﻿site:
+site:
   title: WikiZero1
   start_page: wikiZero1::index.adoc
 content:
@@ -7,5 +7,6 @@ content:
       branches: HEAD
 ui:
   bundle:
-    url: https://gitlab.com
+    url: https://gitlab.com/antora/antora-ui-default/-/jobs/artifacts/HEAD/raw/build/ui-bundle.zip?job=bundle-stable
     snapshot: true
+  supplemental_files: ./supplemental-ui
