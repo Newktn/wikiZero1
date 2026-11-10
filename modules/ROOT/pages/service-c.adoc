@@ -1,5 +1,151 @@
-= Service C
+= Service C : Base de données Chinook
 
-== Vue d'ensemble
+Interrogation et modification en mémoire de la table `Employee` (`chinook.db`) :
 
-Documentation technique du **Service C**.
+*requete*
+
+SELECT EmployeeId, LastName, FirstName, Title, Email FROM Employee WHERE LastName LIKE '%Edwards%';
+
+*insert*
+
+INSERT INTO Employee (
+    EmployeeId, LastName, FirstName, Title, ReportsTo, 
+    BirthDate, HireDate, Address, City, State, 
+    Country, PostalCode, Phone, Fax, Email
+) 
+VALUES (
+    9, 'Doe', 'Jane', 'Sales Support Agent', 2, 
+    '1985-07-14 00:00:00', '2017-04-01 00:00:00', '11204 Albert St NW', 'Montreal', 'QC', 
+    'Canada', 'H3Z 2X1', '+1 (514) 555-0133', '+1 (514) 555-0155', 'jane.doe@chinookcorp.com'
+);
+
+*jointure*
+
+SELECT Artiste, Album, Morceau, Prix
+FROM (
+  SELECT 
+    Artist.Name AS Artiste, 
+    Album.Title AS Album, 
+    Track.Name AS Morceau, 
+    Track.UnitPrice AS Prix,
+    ROW_NUMBER() OVER (PARTITION BY Album.AlbumId ORDER BY Track.TrackId) AS rang
+  FROM Artist
+  JOIN Album ON Artist.ArtistId = Album.ArtistId
+  JOIN Track ON Album.AlbumId = Track.AlbumId
+  WHERE Artist.Name LIKE '%Foo Fighters%'
+)
+WHERE rang <= 2;
+
+++++
+<div style="margin: 15px 0; padding: 15px; border: 1px solid #ddd; border-radius: 5px; font-family: sans-serif;">
+  
+  <div style="margin-bottom: 12px;">
+    <label for="requete-sql-sc" style="display: block; font-weight: bold; margin-bottom: 5px;">Requête SQL (SELECT, INSERT, UPDATE, DELETE) :</label>
+    <input type="text" id="requete-sql-sc" value="SELECT EmployeeId, LastName, FirstName, Title, Email FROM Employee;" style="width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 4px; font-family: monospace; box-sizing: border-box;">
+  </div>
+
+  <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+    <button onclick="executerRequeteServiceC()" style="padding: 8px 16px; background-color: #0066cc; color: white; border: none; border-radius: 4px; cursor: pointer; font-weight: bold;">
+      Exécuter la requête
+    </button>
+    <button onclick="telechargerBaseModifiee()" style="padding: 8px 16px; background-color: #2b7a0b; color: white; border: none; border-radius: 4px; cursor: pointer; font-weight: bold;">
+      Télécharger chinook.db modifié
+    </button>
+  </div>
+
+  <p id="statut-db-sc" style="margin-top: 10px; font-size: 14px; color: #555;">Initialisation...</p>
+
+  <div id="resultat-table-sc" style="margin-top: 15px; overflow-x: auto;"></div>
+
+</div>
+
+<script>
+let dbEnMemoire = null; // Conserve la base ouverte tant que la page n'est pas rechargée
+
+async function initialiserBase() {
+  if (dbEnMemoire) return dbEnMemoire;
+
+  const rep = await fetch("_attachments/sql-wasm.js");
+  if (!rep.ok) throw new Error("Fichier _attachments/sql-wasm.js introuvable.");
+  
+  const codeJs = await rep.text();
+  const factory = new Function("define", "module", "exports", codeJs + "; return window.initSqlJs || initSqlJs;");
+  const initSqlJs = factory(undefined, undefined, undefined);
+
+  const SQL = await initSqlJs({
+    locateFile: file => `_attachments/${file}`
+  });
+
+  const response = await fetch("_attachments/chinook.db");
+  if (!response.ok) throw new Error("Fichier _attachments/chinook.db introuvable.");
+  
+  const buffer = await response.arrayBuffer();
+  dbEnMemoire = new SQL.Database(new Uint8Array(buffer));
+  return dbEnMemoire;
+}
+
+async function executerRequeteServiceC() {
+  const statut = document.getElementById("statut-db-sc");
+  const conteneurTable = document.getElementById("resultat-table-sc");
+  const sqlQuery = document.getElementById("requete-sql-sc").value.trim();
+
+  statut.style.color = "#555";
+  statut.textContent = "Exécution en cours...";
+
+  try {
+    const db = await initialiserBase();
+    let resultats = db.exec(sqlQuery);
+
+    // Si c'est un INSERT, UPDATE ou DELETE, resultats est vide : on réaffiche automatiquement la table Employee
+    if (!resultats || resultats.length === 0) {
+      resultats = db.exec("SELECT EmployeeId, LastName, FirstName, Title, Email FROM Employee;");
+      statut.style.color = "#2b7a0b";
+      statut.textContent = "Modification appliquée en mémoire ! Table Employee actualisée ci-dessous :";
+    } else {
+      statut.style.color = "#2b7a0b";
+      statut.textContent = `${resultats[0].values.length} ligne(s) trouvée(s).`;
+    }
+
+    if (resultats && resultats.length > 0) {
+      const colonnes = resultats[0].columns;
+      const lignes = resultats[0].values;
+
+      let html = '<table style="width: 100%; border-collapse: collapse; font-size: 14px;">';
+      html += '<thead><tr style="background-color: #f2f2f2; text-align: left;">';
+      colonnes.forEach(col => {
+        html += `<th style="padding: 8px; border: 1px solid #ccc;">${col}</th>`;
+      });
+      html += '</tr></thead><tbody>';
+
+      lignes.forEach(ligne => {
+        html += '<tr>';
+        ligne.forEach(valeur => {
+          html += `<td style="padding: 8px; border: 1px solid #ccc;">${valeur !== null ? valeur : ''}</td>`;
+        });
+        html += '</tr>';
+      });
+
+      html += '</tbody></table>';
+      conteneurTable.innerHTML = html;
+    }
+
+  } catch (erreur) {
+    statut.style.color = "#c0392b";
+    statut.textContent = "Erreur SQL : " + erreur.message;
+  }
+}
+
+// Permet de sauvegarder le fichier chinook.db modifié sur votre PC
+function telechargerBaseModifiee() {
+  if (!dbEnMemoire) return;
+  const donneesBinaires = dbEnMemoire.export();
+  const blob = new Blob([donneesBinaires], { type: "application/x-sqlite3" });
+  const lien = document.createElement("a");
+  lien.href = URL.createObjectURL(blob);
+  lien.download = "chinook.db";
+  lien.click();
+}
+
+window.addEventListener("load", executerRequeteServiceC);
+</script>
+++++

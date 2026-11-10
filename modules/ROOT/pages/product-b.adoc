@@ -3,3 +3,78 @@
 == Vue d'ensemble
 
 Documentation officielle du **Product B**.
+
+Sélectionnez vos options ci-dessous pour formspree :
+
+Sélectionnez vos options et indiquez votre e-mail pour recevoir une réponse :
+
+Sélectionnez vos options et indiquez votre e-mail pour valider votre demande :
+
+++++
+<form id="mon-formulaire" action="https://formspree.io" method="POST" style="margin: 15px 0; padding: 15px; border: 1px solid #ddd; border-radius: 5px; max-width: 400px;">
+  
+  <div style="margin-bottom: 15px;">
+    <label for="email" style="display: block; font-weight: bold; margin-bottom: 5px;">Votre adresse e-mail :</label>
+    <input type="email" id="email" name="email" required placeholder="nom@exemple.com" style="width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box;">
+  </div>
+
+  <div style="margin-bottom: 10px;">
+    <input type="checkbox" id="opt1" name="option_1" value="Livraison express">
+    <label for="opt1"> Option 1 : Livraison express</label>
+  </div>
+  
+  <div style="margin-bottom: 10px;">
+    <input type="checkbox" id="opt2" name="option_2" value="Garantie étendue">
+    <label for="opt2"> Option 2 : Garantie étendue</label>
+  </div>
+  
+  <div style="margin-bottom: 15px;">
+    <input type="checkbox" id="opt3" name="option_3" value="Installation sur site">
+    <label for="opt3"> Option 3 : Installation sur site</label>
+  </div>
+  
+  <button type="submit" id="btn-submit" style="padding: 8px 16px; background-color: #0066cc; color: white; border: none; border-radius: 4px; cursor: pointer;">
+    Submit
+  </button>
+
+  <p id="statut-envoi" style="margin-top: 12px; font-weight: bold;"></p>
+</form>
+
+<script>
+const form = document.getElementById("mon-formulaire");
+
+form.addEventListener("submit", async function(event) {
+  event.preventDefault(); // Bloque la redirection vers la page Formspree
+  
+  const statut = document.getElementById("statut-envoi");
+  const bouton = document.getElementById("btn-submit");
+  const donnees = new FormData(event.target);
+
+  bouton.disabled = true;
+  statut.style.color = "#555";
+  statut.textContent = "Envoi en cours...";
+
+  try {
+    const reponse = await fetch(event.target.action, {
+      method: form.method,
+      body: donnees,
+      headers: { 'Accept': 'application/json' }
+    });
+
+    if (reponse.ok) {
+      statut.style.color = "#2b7a0b";
+      statut.textContent = "Merci ! Votre sélection a bien été envoyée.";
+      form.reset(); // Vide les champs et décoche les cases
+    } else {
+      statut.style.color = "#c0392b";
+      statut.textContent = "Erreur lors de l'envoi. Vérifiez votre formulaire.";
+    }
+  } catch (erreur) {
+    statut.style.color = "#c0392b";
+    statut.textContent = "Impossible de joindre le serveur. Vérifiez votre connexion.";
+  } finally {
+    bouton.disabled = false;
+  }
+});
+</script>
+++++

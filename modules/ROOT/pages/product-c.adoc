@@ -3,3 +3,82 @@
 == Vue d'ensemble
 
 Documentation officielle du **Product C**.
+
+Sélectionnez vos options et indiquez votre e-mail pour valider votre demande :
+
+++++
+<form id="formulaire-produit-c" action="https://formspree.io" method="POST" style="margin: 15px 0; padding: 15px; border: 1px solid #ddd; border-radius: 5px; max-width: 450px;">
+  
+  <div style="margin-bottom: 15px;">
+    <label for="email-c" style="display: block; font-weight: bold; margin-bottom: 5px;">Votre adresse e-mail :</label>
+    <input type="email" id="email-c" name="email" required placeholder="nom@exemple.com" style="width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box;">
+  </div>
+
+  <div style="margin-bottom: 10px;">
+    <input type="checkbox" id="opt1-c" name="option_1" value="Livraison express">
+    <label for="opt1-c"> Option 1 : Livraison express</label>
+  </div>
+  
+  <div style="margin-bottom: 10px;">
+    <input type="checkbox" id="opt2-c" name="option_2" value="Garantie étendue">
+    <label for="opt2-c"> Option 2 : Garantie étendue</label>
+  </div>
+  
+  <div style="margin-bottom: 15px;">
+    <input type="checkbox" id="opt3-c" name="option_3" value="Installation sur site">
+    <label for="opt3-c"> Option 3 : Installation sur site</label>
+  </div>
+  
+  <button type="submit" id="btn-submit-c" style="padding: 8px 16px; background-color: #0066cc; color: white; border: none; border-radius: 4px; cursor: pointer;">
+    Submit
+  </button>
+
+  <div style="margin-top: 15px;">
+    <label for="zone-resultat-c" style="display: block; font-weight: bold; margin-bottom: 5px;">Récapitulatif de l'envoi :</label>
+    <textarea id="zone-resultat-c" rows="5" readonly placeholder="Les détails de votre envoi s'afficheront ici..." style="width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box; background-color: #f9f9f9; font-family: monospace;"></textarea>
+  </div>
+</form>
+
+<script>
+const formC = document.getElementById("formulaire-produit-c");
+
+formC.addEventListener("submit", async function(event) {
+  event.preventDefault();
+  
+  const zoneTexte = document.getElementById("zone-resultat-c");
+  const bouton = document.getElementById("btn-submit-c");
+  const donnees = new FormData(event.target);
+
+  // Récupération des valeurs avant la réinitialisation du formulaire
+  const emailSaisi = donnees.get("email");
+  const optionsCoches = [];
+  if (donnees.get("option_1")) optionsCoches.push(donnees.get("option_1"));
+  if (donnees.get("option_2")) optionsCoches.push(donnees.get("option_2"));
+  if (donnees.get("option_3")) optionsCoches.push(donnees.get("option_3"));
+
+  bouton.disabled = true;
+  zoneTexte.value = "Envoi des données vers Formspree en cours...";
+
+  try {
+    const reponse = await fetch(event.target.action, {
+      method: formC.method,
+      body: donnees,
+      headers: { 'Accept': 'application/json' }
+    });
+
+    if (reponse.ok) {
+      const listeOptions = optionsCoches.length > 0 ? optionsCoches.join(", ") : "Aucune option";
+      zoneTexte.value = "STATUT : Envoyé avec succès\n" +
+                        "E-MAIL : " + emailSaisi + "\n" +
+                        "OPTIONS : " + listeOptions;
+      formC.reset();
+    } else {
+      zoneTexte.value = "STATUT : Erreur lors de l'envoi vers Formspree.";
+    }
+  } catch (erreur) {
+    zoneTexte.value = "STATUT : Échec de connexion réseau.";
+  } finally {
+    bouton.disabled = false;
+  }
+});
+</script>

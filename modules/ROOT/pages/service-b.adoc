@@ -4,4 +4,115 @@
 
 Documentation technique du **Service B**.
 
+Donnez votre avis sur ce service :
+
+++++
+<div style="margin: 15px 0; padding: 15px; border: 1px solid #ddd; border-radius: 5px; max-width: 450px; font-family: sans-serif;">
+  
+  <!-- Bouton glissant Oui / Non -->
+  <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 15px;">
+    <span style="font-weight: bold; font-size: 16px;">Content ?</span>
+    <span style="font-size: 14px; color: #555;">Non</span>
+    
+    <label style="position: relative; display: inline-block; width: 52px; height: 28px; cursor: pointer;">
+      <input type="checkbox" id="switch-content" onchange="basculerContent(this)" style="opacity: 0; width: 0; height: 0;">
+      <span id="fond-switch" style="position: absolute; top: 0; left: 0; right: 0; bottom: 0; background-color: #ccc; border-radius: 28px; transition: 0.3s;"></span>
+      <span id="curseur-switch" style="position: absolute; height: 20px; width: 20px; left: 4px; bottom: 4px; background-color: white; border-radius: 50%; transition: 0.3s; box-shadow: 0 1px 3px rgba(0,0,0,0.3);"></span>
+    </label>
+    
+    <span style="font-size: 14px; color: #555;">Oui</span>
+  </div>
+
+  <!-- Zone de texte affichant le statut -->
+  <div style="margin-bottom: 15px;">
+    <label for="statut-content" style="display: block; font-weight: bold; margin-bottom: 5px;">Statut actuel :</label>
+    <textarea id="statut-content" rows="2" readonly style="width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box; background-color: #f9f9f9; font-family: monospace;">Statut : Non (Désactivé)</textarea>
+  </div>
+
+  <!-- Formulaire de note (masqué par défaut tant que Non est sélectionné) -->
+  <form id="form-note" onsubmit="afficherBarreNote(event)" style="display: none; padding-top: 15px; border-top: 1px dashed #ccc;">
+    <label for="input-note" style="display: block; font-weight: bold; margin-bottom: 8px;">Votre note (de 1 à 10) :</label>
+    
+    <div style="display: flex; gap: 10px; align-items: center;">
+      <input type="number" id="input-note" min="1" max="10" required placeholder="1 - 10" style="width: 90px; padding: 8px; border: 1px solid #ccc; border-radius: 4px; font-size: 16px;">
+      
+      <button type="submit" style="padding: 8px 16px; background-color: #0066cc; color: white; border: none; border-radius: 4px; cursor: pointer; font-weight: bold;">
+        Submit
+      </button>
+    </div>
+
+    <!-- Conteneur du graphe à barre horizontale (masqué avant le Submit) -->
+    <div id="conteneur-graphe" style="display: none; margin-top: 15px;">
+      <div style="font-size: 14px; font-weight: bold; margin-bottom: 5px;" id="libelle-note"></div>
+      
+      <!-- Fond gris de la barre -->
+      <div style="width: 100%; height: 26px; background-color: #e9ecef; border-radius: 13px; overflow: hidden; border: 1px solid #ccc;">
+        <!-- Barre colorée dynamique -->
+        <div id="barre-couleur" style="height: 100%; width: 0%; transition: width 0.4s ease, background-color 0.4s ease; display: flex; align-items: center; justify-content: flex-end; padding-right: 10px; color: white; font-weight: bold; font-size: 13px; box-sizing: border-box;"></div>
+      </div>
+    </div>
+  </form>
+
+</div>
+
+<script>
+function basculerContent(caseCochee) {
+  const fond = document.getElementById("fond-switch");
+  const curseur = document.getElementById("curseur-switch");
+  const zoneTexte = document.getElementById("statut-content");
+  const formNote = document.getElementById("form-note");
+  const conteneurGraphe = document.getElementById("conteneur-graphe");
+
+  if (caseCochee.checked) {
+    fond.style.backgroundColor = "#2b7a0b";
+    curseur.style.transform = "translateX(24px)";
+    zoneTexte.value = "Statut : Oui (Activé - Client content)";
+    formNote.style.display = "block"; // Affiche le formulaire de note
+  } else {
+    fond.style.backgroundColor = "#ccc";
+    curseur.style.transform = "translateX(0px)";
+    zoneTexte.value = "Statut : Non (Désactivé)";
+    formNote.style.display = "none"; // Masque le formulaire si on repasse sur Non
+    conteneurGraphe.style.display = "none";
+  }
+}
+
+function afficherBarreNote(event) {
+  event.preventDefault(); // Empêche le rechargement de la page
+  
+  const note = parseInt(document.getElementById("input-note").value, 10);
+  const conteneurGraphe = document.getElementById("conteneur-graphe");
+  const barre = document.getElementById("barre-couleur");
+  const libelle = document.getElementById("libelle-note");
+
+  // Détermination de la couleur selon le barème
+  let couleur = "#000000"; // Noir par défaut (1 à 3)
+  let appreciation = "Insuffisant";
+
+  if (note >= 1 && note <= 3) {
+    couleur = "#111111"; // Noir
+    appreciation = "Faible";
+  } else if (note >= 4 && note <= 6) {
+    couleur = "#d93025"; // Rouge
+    appreciation = "Moyen";
+  } else if (note >= 7 && note <= 8) {
+    couleur = "#f29900"; // Orange
+    appreciation = "Bon";
+  } else if (note >= 9 && note <= 10) {
+    couleur = "#2b7a0b"; // Vert
+    appreciation = "Excellent";
+  }
+
+  // Calcul de la largeur en pourcentage (ex: note 7 -> 70%)
+  const pourcentage = note * 10;
+
+  conteneurGraphe.style.display = "block";
+  libelle.textContent = "Résultat : " + note + " / 10 (" + appreciation + ")";
+  barre.style.backgroundColor = couleur;
+  barre.style.width = pourcentage + "%";
+  barre.textContent = note + "/10";
+}
+</script>
+++++
+
 
