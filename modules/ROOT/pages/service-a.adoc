@@ -1,5 +1,13 @@
-= Service A
+= Service A =
 
-== Vue d'ensemble
+== Vue d'ensemble ==
 
 Documentation technique du **Service A**.
+
+*** asciidoc ***
+
+== Page Produit ==
+
+Voici l'illustration de notre service A :
+
+image::boussole.jpg[title="boussole",width=200,align="left"]

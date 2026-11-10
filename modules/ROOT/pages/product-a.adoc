@@ -1,5 +1,24 @@
-= Product A
+= Product A =
 
-== Vue d'ensemble
+== Vue d'ensemble ==
 
-Documentation officielle du **Product A**.
+Présentation officielle du **Product A**.
+
+** asciidoc **
+
+Voici l'illustration de notre produit A :
+
+image::boussole.jpg[title="boussole",width=200,align="left"]
+
+** asciidoc **
+
+*** video du rep attachments ***
+
+++++
+<video width="320" controls>
+  <source src="_attachments/mer.mp4" type="video/mp4">
+  Votre navigateur ne supporte pas la lecture vidéo.
+</video>
+++++
+
+
